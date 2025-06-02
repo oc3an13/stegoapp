@@ -17,7 +17,6 @@ public:
     using ProgressCallback = std::function<void(int)>;
     using StatusCallback = std::function<void(const QString&)>;
 
-
     bool hideFileInImage(const QString& inputFilePath,
                          const QString& coverImagePath,
                          const QString& outputStegoImagePath,
@@ -34,7 +33,7 @@ public:
 private:
     QByteArray aesEncrypt(const QByteArray& data, const QByteArray& key, const QByteArray& iv);
     QByteArray aesDecrypt(const QByteArray& encryptedData, const QByteArray& key, const QByteArray& iv);
-    QByteArray deriveKeyFromPassword(const QString& password);
+    QByteArray deriveKeyWithPBKDF2(const QString& password, const QByteArray& salt, int keyLength);
 
     bool embedData(cv::Mat& image, const QByteArray& data, ProgressCallback progressCb);
     QByteArray extractData(const cv::Mat& image, quint64 dataLength, ProgressCallback progressCb);
@@ -45,7 +44,8 @@ private:
     const int AES_KEY_SIZE_BYTES = 32;
     const int AES_IV_SIZE_BYTES = 16;
     const int AES_BLOCK_SIZE_BYTES = 16;
-    const int PASSWORD_HASH_SIZE_BYTES = 32;
+    const int PBKDF2_SALT_SIZE_BYTES = 16; 
+    const int PBKDF2_ITERATIONS = 10000; 
 
     StatusCallback m_statusCb;
 };
