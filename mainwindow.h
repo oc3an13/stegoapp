@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "steganographycore.h"
 #include "passwordvalidator.h"
+#include <QFutureWatcher>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -15,6 +16,10 @@ class MainWindow : public QMainWindow {
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+signals:
+    void updateProgressBarSignal(int percentage);
+    void updateStatusLabelSignal(const QString& statusMessage);
 
 private slots:
     void on_browseInputFileButton_hide_clicked();
@@ -29,15 +34,36 @@ private slots:
     void updateHideButtonState();
     void updateExtractButtonState();
 
-    void handleProgress(int percentage);
-    void handleStatus(const QString& statusMessage);
-
+    void handleUpdateProgressBar(int percentage);
+    void handleUpdateStatusLabel(const QString& statusMessage);
+    void handleHideOperationFinished();
+    void handleExtractOperationFinished();
 
 private:
     Ui::MainWindow *ui;
     SteganographyCore m_stegoCore;
+
     QString m_inputFilePath_hide;
     QString m_coverImagePath_hide;
     QString m_stegoImagePath_extract;
+
+    QFutureWatcher<bool> m_hideOperationWatcher;
+    QFutureWatcher<bool> m_extractOperationWatcher;
+
+    struct HideParams {
+        QString inputFilePath;
+        QString coverImagePath;
+        QString outputStegoImagePath;
+        QString password;
+    };
+    HideParams m_currentHideParams;
+
+    struct ExtractParams {
+        QString stegoImagePath;
+        QString outputDirectory;
+        QString password;
+        QString originalFileNameResult;
+    };
+    ExtractParams m_currentExtractParams;
 };
 #endif // MAINWINDOW_H
